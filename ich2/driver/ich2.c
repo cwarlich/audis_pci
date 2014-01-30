@@ -51,14 +51,14 @@ typedef unsigned int gamecp_reg_t;
 /* both sharing one integer. The number returned by this function is  */
 /* how many of the (lower) bits of that integer are reserved for the  */
 /* bit position. */
-static inline int gamecp_split(void)
+static int gamecp_split(void)
 {
 	return 0;
 }
 
 /* This function knows how to acknowledge an interrupt for a specific */
 /* event identifier / reason combination.                             */
-static inline void gamecp_ack(struct gamecp_device *gamecp, eventid_t event_reason)
+static void gamecp_ack(struct gamecp_device *gamecp, eventid_t event_reason)
 {
 }
 
@@ -67,7 +67,7 @@ static inline void gamecp_ack(struct gamecp_device *gamecp, eventid_t event_reas
 /* interrupt source is active. This yields much better performance     */
 /* when testing single bits (see next function) compared to doing a    */
 /* new register read for every test.                                   */
-static inline bool gamecp_store(struct gamecp_device *gamecp)
+static bool gamecp_store(struct gamecp_device *gamecp)
 {
 	static bool toggle = 0;
 	toggle = !toggle;
@@ -76,7 +76,7 @@ static inline bool gamecp_store(struct gamecp_device *gamecp)
 /* This function knows how to test whether a interrupt source bit for  */
 /* a specific event identifier / reason combination is set by          */
 /* evaluating the previously stored snapshot.                          */
-static inline bool gamecp_test(struct gamecp_device *gamecp, eventid_t event_reason)
+static bool gamecp_test(struct gamecp_device *gamecp, eventid_t event_reason)
 {
 	return 1;
 }
@@ -84,7 +84,7 @@ static inline bool gamecp_test(struct gamecp_device *gamecp, eventid_t event_rea
 /* This function knows how to set up an interrupt to fire on the       */
 /* reason being encoded in a specific event identifier / reason        */
 /* combination.                                                        */
-static inline void gamecp_trigger(struct gamecp_device *gamecp, eventid_t event_reason)
+static void gamecp_trigger(struct gamecp_device *gamecp, eventid_t event_reason)
 {
 }
 
@@ -93,7 +93,7 @@ static inline void gamecp_trigger(struct gamecp_device *gamecp, eventid_t event_
 //#define ALIGNMENT_HACK
 /* This function does additional initialization at the end of          */
 /* module_init                                                         */
-static inline int gamecp_postinit(struct gamecp_device *gamecp)
+static int gamecp_postinit(struct gamecp_device *gamecp)
 {
 #ifdef ALIGNMENT_HACK
 	int i, j, size = 100;
@@ -118,7 +118,7 @@ static inline int gamecp_postinit(struct gamecp_device *gamecp)
 	else return -ENOMEM;
 }
 /* This function does additional cleanup at the start of module_exit   */
-static inline void gamecp_preexit(struct gamecp_device *gamecp)
+static void gamecp_preexit(struct gamecp_device *gamecp)
 {
 	iowrite32(0, gamecp->regs + ICH2_DMA_BASE);
 	free_page((long unsigned int) gamecp->user_config);

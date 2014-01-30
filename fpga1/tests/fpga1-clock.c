@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
 	pthread_setschedprio(pthread_self(), 80);
 
 	/* Clock 1 setup for a rising edge as sync. */
-	clockid1 = register_clock(fd, FPGA1_INT0_TIMER0_IRQ_RISING, &clock_period1);
+	clockid1 = register_clock(fd, CLOCK_SYNC, FPGA1_INT0_TIMER0_IRQ_RISING, &clock_period1);
 	assert(clockid1 >= 0);
 	memset(&timer_event1, 0, sizeof(timer_event1));
 	err = sigevent_set_notification(&timer_event1, 0, SIGRT0, pthread_self());
@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
 	write_reg32(regs, FPGA1_REGS_TIMER_CTR, 0x1);
 
 	/* Clock 2 setup for a falling edge as sync. */
-	clockid2 = register_clock(fd, FPGA1_INT0_RTC_INT_FALLING, &clock_period2);
+	clockid2 = register_clock(fd, CLOCK_SYNC, FPGA1_INT0_RTC_INT_FALLING, &clock_period2);
 	assert(clockid2 >= 0);
 	memset(&timer_event2, 0, sizeof(timer_event2));
 	err = sigevent_set_notification(&timer_event2, 0, SIGRT1, pthread_self());
@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
 	/* Clock 3 setup for a rising edge as sync. */
 	/* The periodic sync interupt is triggered by SW from event below, */
 	/* being kicked in the for loop. */
-	clockid3 = register_clock(fd, FPGA1_INT0_T7_INT_RISING, &clock_period3);
+	clockid3 = register_clock(fd, CLOCK_SYNC, FPGA1_INT0_T7_INT_RISING, &clock_period3);
 	assert(clockid3 >= 0);
 	memset(&timer_event3, 0, sizeof(timer_event3));
 	/* We share SIGRT0. */

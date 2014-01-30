@@ -25,7 +25,7 @@ void write_reg32(uint8_t *regs, unsigned int offset, uint32_t val) {
 uint8_t *regs;
 int tmr_cnt = 0;
 #define MY_SIGVAL_CODE 0xbeeb
-#define SIGINFO
+//#define SIGINFO
 
 void handler(union sigval val) {
 	// Check value

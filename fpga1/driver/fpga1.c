@@ -51,12 +51,12 @@ typedef unsigned int gamecp_reg_t;
 /* both sharing one integer. The number returned by this function is  */
 /* how many of the (lower) bits of that integer are reserved for the  */
 /* bit position. */
-static inline int gamecp_split(void) {return 8;}
+static int gamecp_split(void) {return 8;}
 
 /* This function knows how to acknowledge an interrupt for a specific */
 /* event identifier / reason combination.                             */
 #define FPGA1_REGS_INT0_SRC             0x0000  /* INT_SOURCE1 */
-static inline void gamecp_ack(struct gamecp_device *gamecp, eventid_t event_reason)
+static void gamecp_ack(struct gamecp_device *gamecp, eventid_t event_reason)
 {
 	/* Calculate the value being mapped to the event identifier.   */
 	int indexAndBit = GAMECP_INTERRUPTS[event_reason / gamecp->reason_num];
@@ -78,7 +78,7 @@ static inline void gamecp_ack(struct gamecp_device *gamecp, eventid_t event_reas
 /* interrupt source is active. This yields much better performance     */
 /* when testing single bits (see next function) compared to doing a    */
 /* new register read for every test.                                   */
-static inline bool gamecp_store(struct gamecp_device *gamecp)
+static bool gamecp_store(struct gamecp_device *gamecp)
 {
 	/* The generic part of the driver magically took care to       */
 	/* allocate sufficient space for all interrupt source          */
@@ -100,7 +100,7 @@ static inline bool gamecp_store(struct gamecp_device *gamecp)
 /* This function knows how to test whether a interrupt source bit for  */
 /* a specific event identifier / reason combination is set by          */
 /* evaluating the previously stored snapshot.                          */
-static inline bool gamecp_test(struct gamecp_device *gamecp, eventid_t event_reason)
+static bool gamecp_test(struct gamecp_device *gamecp, eventid_t event_reason)
 {
 	/* Assuming a snapshot of the interrupt source registers has   */
 	/* already been stored.                                        */
@@ -132,7 +132,7 @@ static inline bool gamecp_test(struct gamecp_device *gamecp, eventid_t event_rea
 /* This function knows how to set up an interrupt to fire on the       */
 /* reason being encoded in a specific event identifier / reason        */
 /* combination.                                                        */
-static inline void gamecp_trigger(struct gamecp_device *gamecp, eventid_t event_reason)
+static void gamecp_trigger(struct gamecp_device *gamecp, eventid_t event_reason)
 {
 	/* Calculate the value being mapped to the event identifier.   */
 	int indexAndBit = GAMECP_INTERRUPTS[event_reason / gamecp->reason_num];
@@ -154,14 +154,14 @@ static inline void gamecp_trigger(struct gamecp_device *gamecp, eventid_t event_
 
 /* This function does additional initialization at the end of          */
 /* module_init                                                         */
-static inline int gamecp_postinit(struct gamecp_device *gamecp)
+static int gamecp_postinit(struct gamecp_device *gamecp)
 {
 	/* Set the LED matrix display to show the character *.         */
 	iowrite8('+', gamecp->regs + FPGA1_REGS_LED_MATRIX);
 	return 0;
 }
 /* This function does additional cleanup at the start of module_exit   */
-static inline void gamecp_preexit(struct gamecp_device *gamecp)
+static void gamecp_preexit(struct gamecp_device *gamecp)
 {
 	/* Switch the LED matrix display off.                          */
 	iowrite8(0, gamecp->regs + FPGA1_REGS_LED_MATRIX);

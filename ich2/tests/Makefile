@@ -2,7 +2,7 @@ tests = ich2-dma ich2-mmap
 
 CFLAGS = -g -Wall -I../driver -I ../.. -D_AUD_SOURCE
 LDFLAGS = -specs=specs-audrt-prio -laudis -lrt -lpthread -Xlinker -dynamic-linker -Xlinker /audislib/ld-linux.so.2
-CC := /root/views/dcuos7/derived/tdc/tools/bin/i686-v42-gcc
+CC := $(CROSS_COMPILE)gcc
 
 all: $(tests)
 

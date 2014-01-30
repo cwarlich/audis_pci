@@ -236,13 +236,13 @@ GAMECP_MAKE_ARRAY(GAMECP_INTERRUPTS);
 
 /* These functions must be implemented to match the real hardware. */
 struct gamecp_device;
-static inline int gamecp_split(void);
-static inline void gamecp_ack(struct gamecp_device *gamecp, eventid_t event);
-static inline void gamecp_trigger(struct gamecp_device *gamecp, eventid_t event);
-static inline bool gamecp_store(struct gamecp_device *gamecp);
-static inline bool gamecp_test(struct gamecp_device *gamecp, eventid_t event);
-static inline int gamecp_postinit(struct gamecp_device *gamecp);
-static inline void gamecp_preexit(struct gamecp_device *gamecp);
+static int gamecp_split(void);
+static void gamecp_ack(struct gamecp_device *gamecp, eventid_t event);
+static void gamecp_trigger(struct gamecp_device *gamecp, eventid_t event);
+static bool gamecp_store(struct gamecp_device *gamecp);
+static bool gamecp_test(struct gamecp_device *gamecp, eventid_t event);
+static int gamecp_postinit(struct gamecp_device *gamecp);
+static void gamecp_preexit(struct gamecp_device *gamecp);
 
 /* Calculate bit position. */
 static inline int gamecp_bitposition(int indexAndBit)
@@ -360,11 +360,10 @@ irqreturn_t gamecp_irq_nonrt_handler(int irq, void *devid)
 {
 	struct gamecp_device *gamecp = devid;
 	int i, ret;
-	printk("nonrt isr\n");
 	for(i = 0; i < ARRAY_NUMBER(GAMECP_INTERRUPTS); i++) {
 		if(gamecp->nonrt_event[i]) {
 			ret = rt_send_event(&gamecp->ev[i]);
-			if(ret) printk(KERN_WARNING "Failed to send NonRT-event %s\n", gamecp_name(i * gamecp_numberOfReasons()));
+			if(ret < 0) printk(KERN_WARNING "Failed to send NonRT-event %s, reason: %d\n", gamecp_name(i * gamecp_numberOfReasons()), ret);
 			gamecp->nonrt_event[i] = false;
 		}
 	}
@@ -413,7 +412,7 @@ err_register_event:
 }
 
 /* Clock registration and deregistration. */
-void clock_cleanup_callback(eventid_t event, struct file *filp) {
+void clock_cleanup_callback(clocksrcid_t event, struct file *filp) {
 	struct gamecp_private *gamecp_priv = filp->private_data;
 	struct gamecp_device *gamecp = gamecp_priv->device;
         int r = gamecp->reason_num;
@@ -432,7 +431,7 @@ static int gamecp_register_clock(struct gamecp_private *gamecp_priv,
 	eventid_t event;
 
 	if (rt_copy_from_user(&clock_desc, user_clock_desc, sizeof(clock_desc))) return -EFAULT;
-        event = clock_desc.clock_type;
+        event = clock_desc.clock_srcid;
 	clock_desc.clock_cleanup_callback = clock_cleanup_callback;
 	ret = rt_register_sync_clock(filp, &clock_desc, CLOCK_SYNC_HARD, &clock_callback);
 	if (ret < 0) return ret;
@@ -482,9 +481,6 @@ static long gamecp_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		break;
 	case AuD_UNREGISTER_CLOCK:
 		ret = gamecp_unregister_clock(gamecp_priv, filp, (clockid_t)arg);
-		break;
-	case AuD_WAIT_FOR_EVENT:
-		ret = rt_wait_for_event();
 		break;
 	default:
 		ret = -ENOTTY;
